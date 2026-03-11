@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class V-B Term I — Pawar Public School</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#07090f;color:#e2e8f0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh}
+:root{--acc:#f59e0b;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--purple:#a855f7;--surf:#0d1424;--bord:#1e293b;--muted:#64748b}
+.header{background:linear-gradient(135deg,#0d1424,#07090f);border-bottom:1px solid var(--bord);padding:20px 24px}
+.header h1{font-size:clamp(15px,2.5vw,22px);font-weight:800;letter-spacing:-.5px}
+.header p{font-size:11px;color:var(--muted);margin-top:4px}
+.statsbar{background:#0a1020;border-bottom:1px solid var(--bord);display:flex;flex-wrap:wrap}
+.stat{padding:12px 20px;border-right:1px solid var(--bord)}
+.stat .val{font-size:22px;font-weight:800;line-height:1}
+.stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-top:3px}
+.nav{background:#0a1020;border-bottom:2px solid var(--bord);display:flex;overflow-x:auto;padding:0 14px}
+.nav button{padding:11px 15px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-family:inherit;transition:all .15s}
+.nav button.active{color:var(--acc);border-bottom-color:var(--acc)}
+.content{max-width:1400px;margin:0 auto;padding:20px 18px 60px}
+.page{display:none}.page.active{display:block}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.pill{padding:5px 12px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;border:1px solid var(--bord);background:transparent;color:var(--muted);font-family:inherit;transition:all .15s}
+.pill.on{background:var(--acc);border-color:var(--acc);color:#000}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:16px}
+.box{background:var(--surf);border:1px solid var(--bord);border-radius:10px;padding:18px}
+.box-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin-bottom:14px}
+.chart-wrap{position:relative}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:#1a2235;border:1px solid var(--bord);margin-bottom:6px}
+.medal{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.rank-name{flex:1;min-width:0;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-sub{font-size:10px;color:var(--muted)}
+.rank-score{font-size:14px;font-weight:800;flex-shrink:0}
+.ins-card{background:var(--surf);border:1px solid var(--bord);border-radius:9px;padding:13px 15px}
+.ins-card .lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:700}
+.ins-card .val{font-size:19px;font-weight:800;margin-bottom:2px}
+.ins-card .sub{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:7px 10px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);font-weight:700}
+td{padding:7px 10px;border-bottom:1px solid #0d1830}
+.badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+.bar-mini{height:6px;background:var(--bord);border-radius:3px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar-fill{height:100%;border-radius:3px}
+input[type=text]{width:100%;padding:9px 14px;background:var(--surf);border:1px solid var(--bord);border-radius:8px;color:#e2e8f0;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit}
+.student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;max-height:220px;overflow-y:auto;margin-bottom:16px}
+.student-btn{background:var(--surf);border:1px solid var(--bord);color:#e2e8f0;padding:8px 11px;border-radius:8px;cursor:pointer;text-align:left;font-size:11px;line-height:1.5;font-family:inherit;transition:all .15s}
+.student-btn.sel{background:rgba(59,130,246,.15);border-color:var(--blue);color:#60a5fa}
+.student-btn .roll{font-size:9px;color:#475569}
+.heatmap-wrap{overflow-x:auto}
+.heatmap-wrap table td{width:42px;height:22px;text-align:center;font-weight:700;font-size:10px;border:1px solid #07090f}
+@media(max-width:768px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Pawar Public School &nbsp;·&nbsp; Class <span style="color:var(--acc)">V-B</span> &nbsp;·&nbsp; Term I Analysis</h1>
+  <p>Academic Year 2024–25 &nbsp;|&nbsp; Midterm (max 15) · SA (max 30) · Term Total (max 100)</p>
+</div>
+
+<div class="statsbar" id="statsbar"></div>
+
+<div class="nav">
+  <button class="active" onclick="showPage('overview',this)">📊 Overview</button>
+  <button onclick="showPage('subject',this)">📚 By Subject</button>
+  <button onclick="showPage('student',this)">👤 Per Student</button>
+  <button onclick="showPage('heatmap',this)">🌡️ Heatmap</button>
+  <button onclick="showPage('insights',this)">💡 Insights</button>
+</div>
+
+<div class="content">
+  <div id="overview" class="page active"></div>
+  <div id="subject" class="page"></div>
+  <div id="student" class="page"></div>
+  <div id="heatmap" class="page"></div>
+  <div id="insights" class="page"></div>
+</div>
+
+<script>
+const SK=["ENGLISH","HINDI IInd LANGUAGE","MARATHI SECOND LANGUAGE","HINDI IIIrd LANGUAGE","MARATHI IIIrd LANGUAGE","MATHS","SCIENCE","SOCIAL STUDIES","COMPUTER"];
+const SS=["English","Hindi II","Marathi II","Hindi III","Marathi III","Maths","Science","Social St.","Computer"];
+const STUDENTS=[{"roll":1,"name":"AARYA JAYESH TAKWANI","subjects":{"ENGLISH":{"midterm":12,"sa":20.5,"term":61},"HINDI IInd LANGUAGE":{"midterm":8,"sa":14.5,"term":44},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":8,"sa":7.5,"term":50},"MATHS":{"midterm":9,"sa":20.5,"term":58},"SCIENCE":{"midterm":9,"sa":24,"term":68},"SOCIAL STUDIES":{"midterm":10,"sa":17,"term":49},"COMPUTER":{"midterm":8,"sa":21,"term":60}}},{"roll":2,"name":"ARNAVI AMIT MHATRE","subjects":{"ENGLISH":{"midterm":13,"sa":14,"term":61},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":11,"sa":15.5,"term":62},"HINDI IIIrd LANGUAGE":{"midterm":10,"sa":15.5,"term":60},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":5,"sa":14.5,"term":58},"SCIENCE":{"midterm":14,"sa":24.5,"term":71},"SOCIAL STUDIES":{"midterm":10,"sa":16.5,"term":58},"COMPUTER":{"midterm":14,"sa":21,"term":74}}},{"roll":3,"name":"BARKHA RAKESH CHOUHAN","subjects":{"ENGLISH":{"midterm":2,"sa":5.5,"term":16},"HINDI IInd LANGUAGE":{"midterm":9,"sa":14,"term":38},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":7,"sa":8.5,"term":50},"MATHS":{"midterm":null,"sa":6.5,"term":23},"SCIENCE":{"midterm":3,"sa":9.5,"term":23},"SOCIAL STUDIES":{"midterm":6,"sa":9.5,"term":33},"COMPUTER":{"midterm":7,"sa":6,"term":35}}},{"roll":4,"name":"DAMIA ABHISHEK PATEL","subjects":{"ENGLISH":{"midterm":11,"sa":17,"term":45},"HINDI IInd LANGUAGE":{"midterm":13,"sa":16,"term":58},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":9,"sa":15,"term":53},"MATHS":{"midterm":6,"sa":9,"term":44},"SCIENCE":{"midterm":9,"sa":22,"term":47},"SOCIAL STUDIES":{"midterm":11,"sa":13.5,"term":53},"COMPUTER":{"midterm":11,"sa":16,"term":61}}},{"roll":5,"name":"DHRUVI RAHUL SHRIKAR","subjects":{"ENGLISH":{"midterm":12,"sa":21.5,"term":67},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":20.5,"term":69},"HINDI IIIrd LANGUAGE":{"midterm":11,"sa":22,"term":70},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":17.5,"term":57},"SCIENCE":{"midterm":14,"sa":26.5,"term":75},"SOCIAL STUDIES":{"midterm":14,"sa":20.5,"term":78},"COMPUTER":{"midterm":13,"sa":27,"term":72}}},{"roll":6,"name":"DRISHANA MEHUL MEHTA","subjects":{"ENGLISH":{"midterm":12,"sa":17,"term":69},"HINDI IInd LANGUAGE":{"midterm":9,"sa":14.5,"term":54},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":10,"sa":18.5,"term":68},"MATHS":{"midterm":10,"sa":13,"term":56},"SCIENCE":{"midterm":13,"sa":23.5,"term":72},"SOCIAL STUDIES":{"midterm":12,"sa":16.5,"term":49},"COMPUTER":{"midterm":7,"sa":24,"term":60}}},{"roll":7,"name":"MAHEE VISHAL SAWANT","subjects":{"ENGLISH":{"midterm":13,"sa":23,"term":79},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":23,"term":76},"HINDI IIIrd LANGUAGE":{"midterm":12,"sa":25.5,"term":84},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":27,"term":75},"SCIENCE":{"midterm":14,"sa":26.5,"term":90},"SOCIAL STUDIES":{"midterm":11,"sa":26.5,"term":79},"COMPUTER":{"midterm":12,"sa":22,"term":59}}},{"roll":8,"name":"MEERA ASHISH PARAB","subjects":{"ENGLISH":{"midterm":13,"sa":20.5,"term":70},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":11,"sa":16.5,"term":51},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":17.5,"term":51},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":12,"term":61},"SCIENCE":{"midterm":14,"sa":24.5,"term":84},"SOCIAL STUDIES":{"midterm":null,"sa":19.5,"term":58},"COMPUTER":{"midterm":10,"sa":26,"term":75}}},{"roll":9,"name":"OJASVI AMARDEEP HAKE","subjects":{"ENGLISH":{"midterm":12,"sa":18.5,"term":75},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":18.5,"term":72},"HINDI IIIrd LANGUAGE":{"midterm":12,"sa":22.5,"term":74},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":16.5,"term":69},"SCIENCE":{"midterm":11,"sa":19,"term":73},"SOCIAL STUDIES":{"midterm":9,"sa":21.5,"term":73},"COMPUTER":{"midterm":14,"sa":23,"term":74}}},{"roll":10,"name":"PARI DINESH AVSARE","subjects":{"ENGLISH":{"midterm":5,"sa":9.5,"term":37},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":6,"sa":5,"term":35},"HINDI IIIrd LANGUAGE":{"midterm":6,"sa":10,"term":35},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":0,"sa":3.5,"term":26},"SCIENCE":{"midterm":5,"sa":9.5,"term":45},"SOCIAL STUDIES":{"midterm":9,"sa":10,"term":46},"COMPUTER":{"midterm":7,"sa":9,"term":44}}},{"roll":11,"name":"PARI PRADIP KENDRE","subjects":{"ENGLISH":{"midterm":15,"sa":23.5,"term":89},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":20.5,"term":64},"HINDI IIIrd LANGUAGE":{"midterm":13,"sa":20.5,"term":81},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":12,"sa":18,"term":73},"SCIENCE":{"midterm":15,"sa":22.5,"term":83},"SOCIAL STUDIES":{"midterm":13,"sa":20.5,"term":78},"COMPUTER":{"midterm":13,"sa":26,"term":84}}},{"roll":12,"name":"PARI VIJAY SALUNKE","subjects":{"ENGLISH":{"midterm":12,"sa":16,"term":70},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":21,"term":76},"HINDI IIIrd LANGUAGE":{"midterm":14,"sa":26.5,"term":82},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":4,"sa":11.5,"term":47},"SCIENCE":{"midterm":12,"sa":21,"term":77},"SOCIAL STUDIES":{"midterm":7,"sa":13.5,"term":59},"COMPUTER":{"midterm":10,"sa":19,"term":64}}},{"roll":13,"name":"PRAJAKTA SANTOSH UMAP","subjects":{"ENGLISH":{"midterm":11,"sa":4,"term":33},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":11,"sa":10,"term":49},"HINDI IIIrd LANGUAGE":{"midterm":13,"sa":17.5,"term":52},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":11.5,"term":48},"SCIENCE":{"midterm":10,"sa":11.5,"term":39},"SOCIAL STUDIES":{"midterm":10,"sa":7,"term":28},"COMPUTER":{"midterm":7,"sa":17,"term":48}}},{"roll":14,"name":"PRANJAL VIKAS SETHIYA","subjects":{"ENGLISH":{"midterm":null,"sa":22.5,"term":74},"HINDI IInd LANGUAGE":{"midterm":null,"sa":25.5,"term":59},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":14,"sa":25,"term":87},"MATHS":{"midterm":15,"sa":28.5,"term":96},"SCIENCE":{"midterm":null,"sa":26.5,"term":77},"SOCIAL STUDIES":{"midterm":14,"sa":26.5,"term":87},"COMPUTER":{"midterm":15,"sa":29,"term":87}}},{"roll":15,"name":"PRASIDDHI HARSHAD BHUVAD","subjects":{"ENGLISH":{"midterm":14,"sa":24.5,"term":86},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":15,"sa":26,"term":87},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":26.5,"term":87},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":10,"sa":26.5,"term":71},"SCIENCE":{"midterm":14,"sa":25.5,"term":89},"SOCIAL STUDIES":{"midterm":14,"sa":26.5,"term":84},"COMPUTER":{"midterm":10,"sa":27,"term":80}}},{"roll":16,"name":"PRISHA DEEPAK GUPTA","subjects":{"ENGLISH":{"midterm":12,"sa":19,"term":69},"HINDI IInd LANGUAGE":{"midterm":12,"sa":18.5,"term":61},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":11,"sa":18,"term":70},"MATHS":{"midterm":7,"sa":17,"term":60},"SCIENCE":{"midterm":12,"sa":21.5,"term":76},"SOCIAL STUDIES":{"midterm":12,"sa":20,"term":73},"COMPUTER":{"midterm":13,"sa":23,"term":71}}},{"roll":17,"name":"PRISHA VINIT PUROHIT","subjects":{"ENGLISH":{"midterm":7,"sa":15,"term":50},"HINDI IInd LANGUAGE":{"midterm":11,"sa":13.5,"term":40},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":13,"sa":15.5,"term":65},"MATHS":{"midterm":5,"sa":6.5,"term":37},"SCIENCE":{"midterm":7,"sa":17,"term":55},"SOCIAL STUDIES":{"midterm":10,"sa":12,"term":52},"COMPUTER":{"midterm":11,"sa":16,"term":56}}},{"roll":18,"name":"SAACHI KAPIL KAMBLE","subjects":{"ENGLISH":{"midterm":11,"sa":16,"term":68},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":12,"sa":17,"term":54},"HINDI IIIrd LANGUAGE":{"midterm":12,"sa":19,"term":55},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":5,"sa":6.5,"term":37},"SCIENCE":{"midterm":12,"sa":15.5,"term":67},"SOCIAL STUDIES":{"midterm":10,"sa":null,"term":37},"COMPUTER":{"midterm":7,"sa":14,"term":49}}},{"roll":19,"name":"SAMIKSHA ANIL YAMGAR","subjects":{"ENGLISH":{"midterm":10,"sa":16.5,"term":64},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":14,"sa":19.5,"term":70},"HINDI IIIrd LANGUAGE":{"midterm":13,"sa":21.5,"term":74},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":7,"sa":13,"term":57},"SCIENCE":{"midterm":14,"sa":15,"term":64},"SOCIAL STUDIES":{"midterm":14,"sa":13,"term":64},"COMPUTER":{"midterm":12,"sa":15,"term":61}}},{"roll":20,"name":"SWARA BAPU PALAV","subjects":{"ENGLISH":{"midterm":13,"sa":18.5,"term":74},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":20.5,"term":76},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":21,"term":77},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":12,"term":68},"SCIENCE":{"midterm":13,"sa":23.5,"term":82},"SOCIAL STUDIES":{"midterm":13,"sa":20,"term":78},"COMPUTER":{"midterm":10,"sa":20,"term":66}}},{"roll":21,"name":"TANYA AMIT MEHTA","subjects":{"ENGLISH":{"midterm":12,"sa":26.5,"term":91},"HINDI IInd LANGUAGE":{"midterm":14,"sa":23.5,"term":80},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":14,"sa":27.5,"term":90},"MATHS":{"midterm":11,"sa":29,"term":89},"SCIENCE":{"midterm":13,"sa":25,"term":76},"SOCIAL STUDIES":{"midterm":14,"sa":19.5,"term":80},"COMPUTER":{"midterm":15,"sa":26,"term":87}}},{"roll":22,"name":"TEJASWINI THIYAGARAJAN","subjects":{"ENGLISH":{"midterm":14,"sa":25,"term":91},"HINDI IInd LANGUAGE":{"midterm":14,"sa":28,"term":87},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":12,"sa":25,"term":78},"MATHS":{"midterm":14,"sa":27.5,"term":92},"SCIENCE":{"midterm":15,"sa":27.5,"term":95},"SOCIAL STUDIES":{"midterm":14,"sa":30,"term":94},"COMPUTER":{"midterm":11,"sa":28,"term":85}}},{"roll":23,"name":"TIARA JITESH GALA","subjects":{"ENGLISH":{"midterm":13,"sa":24,"term":85},"HINDI IInd LANGUAGE":{"midterm":14,"sa":21.5,"term":69},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":14,"sa":23,"term":80},"MATHS":{"midterm":12,"sa":22,"term":76},"SCIENCE":{"midterm":14,"sa":27.5,"term":88},"SOCIAL STUDIES":{"midterm":14,"sa":21,"term":83},"COMPUTER":{"midterm":14,"sa":26,"term":80}}},{"roll":24,"name":"VIHA DEEPEN SHAH","subjects":{"ENGLISH":{"midterm":15,"sa":25,"term":87},"HINDI IInd LANGUAGE":{"midterm":14,"sa":27,"term":87},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":12,"sa":27,"term":85},"MATHS":{"midterm":13,"sa":29,"term":85},"SCIENCE":{"midterm":13,"sa":25,"term":84},"SOCIAL STUDIES":{"midterm":12,"sa":27,"term":82},"COMPUTER":{"midterm":14,"sa":28,"term":92}}},{"roll":25,"name":"AAYUSH RAVINDRA TAWDE","subjects":{"ENGLISH":{"midterm":15,"sa":24.5,"term":84},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":18,"term":71},"HINDI IIIrd LANGUAGE":{"midterm":13,"sa":20,"term":65},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":28.5,"term":90},"SCIENCE":{"midterm":14,"sa":25.5,"term":83},"SOCIAL STUDIES":{"midterm":14,"sa":23,"term":78},"COMPUTER":{"midterm":14,"sa":26,"term":80}}},{"roll":26,"name":"ADVAIT ABHIJEET KADAM","subjects":{"ENGLISH":{"midterm":15,"sa":24.5,"term":89},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":14,"sa":25,"term":75},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":27.5,"term":90},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":12,"sa":28.5,"term":87},"SCIENCE":{"midterm":14,"sa":26.5,"term":91},"SOCIAL STUDIES":{"midterm":15,"sa":24.5,"term":87},"COMPUTER":{"midterm":15,"sa":29,"term":96}}},{"roll":27,"name":"ARJUN PRAMOD BANE","subjects":{"ENGLISH":{"midterm":12,"sa":20.5,"term":77},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":12,"sa":21,"term":73},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":22.5,"term":81},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":10,"sa":24,"term":78},"SCIENCE":{"midterm":15,"sa":23,"term":82},"SOCIAL STUDIES":{"midterm":15,"sa":22,"term":85},"COMPUTER":{"midterm":14,"sa":27,"term":82}}},{"roll":28,"name":"MAITREYA AMOL SAWANT","subjects":{"ENGLISH":{"midterm":11,"sa":21.5,"term":67},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":14,"sa":19.5,"term":62},"HINDI IIIrd LANGUAGE":{"midterm":14,"sa":23,"term":74},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":11,"sa":14,"term":61},"SCIENCE":{"midterm":12,"sa":26,"term":82},"SOCIAL STUDIES":{"midterm":10,"sa":25,"term":74},"COMPUTER":{"midterm":10,"sa":29,"term":82}}},{"roll":29,"name":"MALHAR VINAY SAHASRABUDHE","subjects":{"ENGLISH":{"midterm":11,"sa":23,"term":81},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":22.5,"term":78},"HINDI IIIrd LANGUAGE":{"midterm":14,"sa":19.5,"term":76},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":10,"sa":20.5,"term":75},"SCIENCE":{"midterm":15,"sa":24,"term":83},"SOCIAL STUDIES":{"midterm":12,"sa":26.5,"term":84},"COMPUTER":{"midterm":14,"sa":27,"term":87}}},{"roll":30,"name":"MANAN SAGAR HAVELI","subjects":{"ENGLISH":{"midterm":14,"sa":22.5,"term":90},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":22.5,"term":72},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":25,"term":83},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":14,"sa":26,"term":85},"SCIENCE":{"midterm":12,"sa":27,"term":84},"SOCIAL STUDIES":{"midterm":14,"sa":28,"term":94},"COMPUTER":{"midterm":13,"sa":28,"term":89}}},{"roll":31,"name":"MANGESH RAJESH ATARDE","subjects":{"ENGLISH":{"midterm":8,"sa":7,"term":24},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":4,"sa":5,"term":35},"HINDI IIIrd LANGUAGE":{"midterm":12,"sa":1,"term":29},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":5,"sa":4,"term":29},"SCIENCE":{"midterm":7,"sa":4.5,"term":22},"SOCIAL STUDIES":{"midterm":6,"sa":0,"term":24},"COMPUTER":{"midterm":6,"sa":15,"term":47}}},{"roll":32,"name":"MEGH MAYUR SHAH","subjects":{"ENGLISH":{"midterm":12,"sa":14.5,"term":67},"HINDI IInd LANGUAGE":{"midterm":11,"sa":18,"term":69},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":14,"sa":16.5,"term":72},"MATHS":{"midterm":11,"sa":null,"term":52},"SCIENCE":{"midterm":11,"sa":15.5,"term":61},"SOCIAL STUDIES":{"midterm":11,"sa":19,"term":61},"COMPUTER":{"midterm":7,"sa":21,"term":70}}},{"roll":33,"name":"NAITIK JAIRAJ BHAYANI","subjects":{"ENGLISH":{"midterm":13,"sa":9.5,"term":56},"HINDI IInd LANGUAGE":{"midterm":10,"sa":14,"term":57},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":12,"sa":10,"term":62},"MATHS":{"midterm":9,"sa":11.5,"term":58},"SCIENCE":{"midterm":12,"sa":20,"term":73},"SOCIAL STUDIES":{"midterm":10,"sa":19,"term":64},"COMPUTER":{"midterm":15,"sa":16,"term":63}}},{"roll":34,"name":"NIKSHIT RAVINDRA BHOSALE","subjects":{"ENGLISH":{"midterm":6,"sa":4,"term":21},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":1.5,"term":20},"HINDI IIIrd LANGUAGE":{"midterm":9,"sa":1,"term":31},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":3,"sa":2,"term":11},"SCIENCE":{"midterm":3,"sa":6,"term":30},"SOCIAL STUDIES":{"midterm":null,"sa":4,"term":28},"COMPUTER":{"midterm":null,"sa":8,"term":8}}},{"roll":35,"name":"NIVAAN BINOY PUTHRAN","subjects":{"ENGLISH":{"midterm":11,"sa":9.2,"term":60},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":12,"sa":8,"term":41},"HINDI IIIrd LANGUAGE":{"midterm":11,"sa":13.5,"term":53},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":10,"sa":10,"term":55},"SCIENCE":{"midterm":12,"sa":22.5,"term":72},"SOCIAL STUDIES":{"midterm":12,"sa":13,"term":57},"COMPUTER":{"midterm":15,"sa":16,"term":72}}},{"roll":36,"name":"OM ABHAY DHOTRE","subjects":{"ENGLISH":{"midterm":9,"sa":14,"term":53},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":14,"sa":22.5,"term":76},"HINDI IIIrd LANGUAGE":{"midterm":14,"sa":20,"term":68},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":6,"sa":11,"term":55},"SCIENCE":{"midterm":12,"sa":22,"term":72},"SOCIAL STUDIES":{"midterm":10,"sa":14,"term":56},"COMPUTER":{"midterm":14,"sa":16,"term":72}}},{"roll":37,"name":"PARTH AMIT GAWDE","subjects":{"ENGLISH":{"midterm":null,"sa":22.5,"term":59},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":12.5,"term":48},"HINDI IIIrd LANGUAGE":{"midterm":12,"sa":19.5,"term":64},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":12,"sa":17.5,"term":71},"SCIENCE":{"midterm":null,"sa":21.5,"term":68},"SOCIAL STUDIES":{"midterm":12,"sa":18,"term":66},"COMPUTER":{"midterm":14,"sa":25,"term":80}}},{"roll":38,"name":"SHAURYA VINAY GUJAR","subjects":{"ENGLISH":{"midterm":10,"sa":11,"term":42},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":13,"term":49},"HINDI IIIrd LANGUAGE":{"midterm":14,"sa":16,"term":54},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":null,"sa":11,"term":43},"SCIENCE":{"midterm":11,"sa":15,"term":60},"SOCIAL STUDIES":{"midterm":13,"sa":18,"term":55},"COMPUTER":{"midterm":8,"sa":21,"term":65}}},{"roll":39,"name":"SPARSH AVINASH PAWAR","subjects":{"ENGLISH":{"midterm":10,"sa":11,"term":41},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":9,"sa":13,"term":53},"HINDI IIIrd LANGUAGE":{"midterm":15,"sa":20,"term":73},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":13,"sa":7.5,"term":49},"SCIENCE":{"midterm":14,"sa":22.5,"term":57},"SOCIAL STUDIES":{"midterm":12,"sa":13.5,"term":36},"COMPUTER":{"midterm":9,"sa":null,"term":47}}},{"roll":40,"name":"TANISH PRASHANT KUVALEKAR","subjects":{"ENGLISH":{"midterm":null,"sa":8.5,"term":21},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":1.5,"term":23},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":6,"term":20},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":null,"sa":4,"term":16},"SCIENCE":{"midterm":null,"sa":7.5,"term":21},"SOCIAL STUDIES":{"midterm":null,"sa":8,"term":25},"COMPUTER":{"midterm":null,"sa":15,"term":43}}},{"roll":41,"name":"VANSH HARDIK SHAH","subjects":{"ENGLISH":{"midterm":11,"sa":17,"term":74},"HINDI IInd LANGUAGE":{"midterm":13,"sa":21,"term":76},"MARATHI SECOND LANGUAGE":{"midterm":null,"sa":null,"term":null},"HINDI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI IIIrd LANGUAGE":{"midterm":12,"sa":22,"term":76},"MATHS":{"midterm":12,"sa":23.5,"term":79},"SCIENCE":{"midterm":13,"sa":22.5,"term":79},"SOCIAL STUDIES":{"midterm":13,"sa":21.5,"term":76},"COMPUTER":{"midterm":13,"sa":24,"term":79}}},{"roll":42,"name":"VIRAAJ GOVIND SARAOGI","subjects":{"ENGLISH":{"midterm":14,"sa":25.5,"term":86},"HINDI IInd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MARATHI SECOND LANGUAGE":{"midterm":13,"sa":24.5,"term":83},"HINDI IIIrd LANGUAGE":{"midterm":13,"sa":26,"term":78},"MARATHI IIIrd LANGUAGE":{"midterm":null,"sa":null,"term":null},"MATHS":{"midterm":13,"sa":29,"term":90},"SCIENCE":{"midterm":15,"sa":24.5,"term":91},"SOCIAL STUDIES":{"midterm":13,"sa":27,"term":88},"COMPUTER":{"midterm":15,"sa":28,"term":86}}}];
+
+// ── helpers ──────────────────────────────────────────────
+const avg=a=>{const v=a.filter(x=>x!=null);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null};
+const sAvg=s=>{const t=SK.map(k=>s.subjects[k].term).filter(x=>x!=null);return t.length?+(avg(t).toFixed(1)):0};
+const gc=v=>v>=75?'#22c55e':v>=60?'#3b82f6':v>=40?'#f59e0b':'#ef4444';
+const grade=v=>v>=90?'A+':v>=75?'A':v>=60?'B+':v>=50?'B':v>=40?'C+':'C';
+const tA=SK.map(k=>avg(STUDENTS.map(s=>s.subjects[k].term)));
+const mA=SK.map(k=>avg(STUDENTS.map(s=>s.subjects[k].midterm)));
+const sA=SK.map(k=>avg(STUDENTS.map(s=>s.subjects[k].sa)));
+const allT=STUDENTS.flatMap(s=>SK.map(k=>s.subjects[k].term).filter(x=>x!=null));
+const classAvg=(allT.reduce((a,b)=>a+b,0)/allT.length).toFixed(1);
+const sorted=[...STUDENTS].sort((a,b)=>sAvg(b)-sAvg(a));
+
+// ── stats bar ────────────────────────────────────────────
+const statsData=[
+  ['42','Students','#e2e8f0'],
+  ['9','Subjects','#e2e8f0'],
+  [classAvg,'Class Avg /100','#f59e0b'],
+  [allT.filter(v=>v>=75).length,'Distinctions ≥75','#22c55e'],
+  [allT.filter(v=>v<40).length,'Scores < 40','#ef4444'],
+  [sorted[0].name.split(' ')[0],'Top Student','#60a5fa']
+];
+document.getElementById('statsbar').innerHTML=statsData.map(([v,l,c])=>
+  `<div class="stat"><div class="val" style="color:${c}">${v}</div><div class="lbl">${l}</div></div>`
+).join('');
+
+// ── chart registry ────────────────────────────────────────
+const charts={};
+function mkChart(id,cfg){
+  if(charts[id])charts[id].destroy();
+  const c=document.getElementById(id);
+  if(!c)return;
+  charts[id]=new Chart(c,cfg);
+}
+
+function barCfg(labels,datasets,max,pct=false){
+  return{type:'bar',data:{labels,datasets:datasets.map(d=>({
+    label:d.label,data:d.data,
+    backgroundColor:Array.isArray(d.bg)?d.bg.map(c=>c+'cc'):d.bg+'cc',
+    borderColor:Array.isArray(d.bg)?d.bg:d.bg,
+    borderWidth:1.5,borderRadius:5
+  }))},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},
+    plugins:{legend:{display:datasets.length>1,labels:{color:'#94a3b8',font:{size:11},boxWidth:12}}},
+    scales:{x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'#1e293b'}},
+            y:{max,beginAtZero:true,ticks:{color:'#64748b',callback:v=>pct?v+'%':v},grid:{color:'#1e293b'}}}}};
+}
+
+// ── OVERVIEW PAGE ─────────────────────────────────────────
+let ovMode='term';
+function buildOverview(){
+  const dist=[0,0,0,0,0];
+  allT.forEach(v=>{dist[v<=20?0:v<=40?1:v<=60?2:v<=80?3:4]++;});
+  const top6=sorted.slice(0,6);
+  const bot5=[...sorted].reverse().slice(0,5);
+
+  document.getElementById('overview').innerHTML=`
+  <div class="pills" id="ov-pills">
+    ${[['term','Term /100'],['mid','Midterm /15'],['sa','SA /30'],['cmp','Midterm vs SA']].map(([k,l])=>
+      `<button class="pill${ovMode===k?' on':''}" onclick="setOvMode('${k}')">${l}</button>`).join('')}
+  </div>
+  <div class="grid2">
+    <div class="box"><div class="box-title" id="ov-title">Subject-wise Class Average</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="ov-bar"></canvas></div></div>
+    <div class="box"><div class="box-title">Term Score Distribution</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="ov-dist"></canvas></div></div>
+  </div>
+  <div class="grid2">
+    <div class="box"><div class="box-title">🏆 Top 6 Students</div>
+      ${top6.map((s,i)=>rankItem(i+1,s.name.split(' ').slice(0,2).join(' '),'',sAvg(s),'#f59e0b')).join('')}</div>
+    <div class="box"><div class="box-title">⚠️ Needs Support</div>
+      ${bot5.map((s,i)=>rankItem(i+1,s.name.split(' ').slice(0,2).join(' '),'',sAvg(s),'#ef4444')).join('')}</div>
+  </div>`;
+
+  mkChart('ov-dist',barCfg(['0–20','21–40','41–60','61–80','81–100'],[{label:'Count',data:dist,bg:['#ef4444','#f97316','#f59e0b','#3b82f6','#22c55e']}],Math.max(...dist)+8));
+  renderOvBar();
+}
+
+function renderOvBar(){
+  let cfg;
+  if(ovMode==='cmp'){
+    cfg=barCfg(SS,[
+      {label:'Midterm %',data:mA.map(v=>v!=null?+(v/15*100).toFixed(1):null),bg:'#f59e0b'},
+      {label:'SA %',data:sA.map(v=>v!=null?+(v/30*100).toFixed(1):null),bg:'#3b82f6'}
+    ],100,true);
+    document.getElementById('ov-title').textContent='Midterm % vs SA % — All Subjects';
+  } else {
+    const data=ovMode==='term'?tA:ovMode==='mid'?mA:sA;
+    const pData=ovMode==='term'?tA:ovMode==='mid'?mA.map(v=>v/15*100):sA.map(v=>v/30*100);
+    const max=ovMode==='term'?100:ovMode==='mid'?15:30;
+    cfg=barCfg(SS,[{label:'Avg',data,bg:pData.map(v=>gc(v||0))}],max);
+    document.getElementById('ov-title').textContent='Subject-wise Class Average';
+  }
+  mkChart('ov-bar',cfg);
+}
+
+function setOvMode(m){
+  ovMode=m;
+  document.querySelectorAll('#ov-pills .pill').forEach((b,i)=>{
+    b.classList.toggle('on',['term','mid','sa','cmp'][i]===m);
+  });
+  renderOvBar();
+}
+
+// ── BY SUBJECT PAGE ───────────────────────────────────────
+let subIdx=0;
+function buildSubject(){
+  document.getElementById('subject').innerHTML=`
+  <div class="pills" id="sub-pills">
+    ${SS.map((s,i)=>`<button class="pill${subIdx===i?' on':''}" onclick="setSubj(${i})">${s}</button>`).join('')}
+  </div>
+  <div class="grid2">
+    <div class="box"><div class="box-title" id="sub-list-title">Top Students</div>
+      <div id="sub-list"></div></div>
+    <div class="box"><div class="box-title" id="sub-scat-title">Midterm vs SA</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="sub-scat"></canvas></div></div>
+  </div>
+  <div class="box"><div class="box-title">All Subjects — Midterm % vs SA % (Class Avg)</div>
+    <div class="chart-wrap" style="height:230px"><canvas id="sub-cmp"></canvas></div></div>`;
+
+  mkChart('sub-cmp',barCfg(SS,[
+    {label:'Midterm %',data:mA.map(v=>+(v/15*100).toFixed(1)),bg:'#f59e0b'},
+    {label:'SA %',data:sA.map(v=>+(v/30*100).toFixed(1)),bg:'#3b82f6'}
+  ],100,true));
+  renderSubj();
+}
+
+function renderSubj(){
+  const k=SK[subIdx];
+  const top=STUDENTS.map(s=>{const d=s.subjects[k];return d.term!=null?{...s,t:d.term,m:d.midterm,sa:d.sa}:null})
+    .filter(Boolean).sort((a,b)=>b.t-a.t).slice(0,8);
+  document.getElementById('sub-list-title').textContent=`Top Students — ${SS[subIdx]}`;
+  document.getElementById('sub-list').innerHTML=top.map((s,i)=>
+    rankItem(i+1,s.name.split(' ').slice(0,2).join(' '),`M:${s.m??'AB'} · SA:${s.sa??'AB'}`,s.t,'#f59e0b')).join('');
+
+  document.getElementById('sub-scat-title').textContent=`Midterm vs SA — ${SS[subIdx]}`;
+  const pts=STUDENTS.map(s=>{const d=s.subjects[k];return d.midterm!=null&&d.sa!=null?{x:d.midterm,y:d.sa,n:s.name.split(' ')[0]}:null}).filter(Boolean);
+  mkChart('sub-scat',{type:'scatter',data:{datasets:[{data:pts,backgroundColor:'#a855f799',borderColor:'#a855f7',borderWidth:1,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.n}: M=${c.raw.x} SA=${c.raw.y}`}}},
+      scales:{x:{min:0,max:15,title:{display:true,text:'Midterm',color:'#64748b'},ticks:{color:'#64748b'},grid:{color:'#1e293b'}},
+              y:{min:0,max:30,title:{display:true,text:'SA',color:'#64748b'},ticks:{color:'#64748b'},grid:{color:'#1e293b'}}}}});
+}
+
+function setSubj(i){
+  subIdx=i;
+  document.querySelectorAll('#sub-pills .pill').forEach((b,j)=>b.classList.toggle('on',j===i));
+  renderSubj();
+}
+
+// ── PER STUDENT PAGE ──────────────────────────────────────
+let selRoll=null;
+function buildStudent(){
+  document.getElementById('student').innerHTML=`
+  <input type="text" id="stu-search" placeholder="🔍  Search student name…" oninput="filterStudents()">
+  <div class="student-grid" id="stu-grid"></div>
+  <div id="stu-detail"></div>`;
+  renderStudentGrid('');
+}
+
+function filterStudents(){
+  renderStudentGrid(document.getElementById('stu-search').value);
+}
+
+function renderStudentGrid(q){
+  const f=STUDENTS.filter(s=>s.name.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('stu-grid').innerHTML=f.map(s=>
+    `<button class="student-btn${selRoll===s.roll?' sel':''}" onclick="selectStudent(${s.roll})">
+      <div class="roll">Roll ${s.roll}</div>${s.name.split(' ').slice(0,2).join(' ')}
+    </button>`).join('');
+}
+
+function selectStudent(roll){
+  selRoll=roll;
+  renderStudentGrid(document.getElementById('stu-search').value);
+  const s=STUDENTS.find(x=>x.roll===roll);
+  const mPct=SK.map(k=>s.subjects[k].midterm!=null?+(s.subjects[k].midterm/15*100).toFixed(1):null);
+  const sPct=SK.map(k=>s.subjects[k].sa!=null?+(s.subjects[k].sa/30*100).toFixed(1):null);
+  const radar=SK.map(k=>s.subjects[k].term??0);
+
+  document.getElementById('stu-detail').innerHTML=`
+  <div style="font-size:17px;font-weight:800;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bord)">
+    <span style="color:#60a5fa;margin-right:8px">#${s.roll}</span>${s.name}
+    <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:10px">Avg: ${sAvg(s)}/100</span>
+  </div>
+  <div class="grid2">
+    <div class="box"><div class="box-title">Midterm % vs SA % by Subject</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="stu-bar"></canvas></div></div>
+    <div class="box"><div class="box-title">Performance Radar (Term)</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="stu-radar"></canvas></div></div>
+  </div>
+  <div class="box"><div class="box-title">Score Breakdown</div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Subject</th><th>Midterm /15</th><th>SA /30</th><th>Term /100</th><th>Grade</th><th>Progress</th></tr></thead>
+      <tbody>${SK.map((k,i)=>{
+        const d=s.subjects[k]; if(d.term==null&&d.midterm==null)return'';
+        const c=gc(d.term||0);
+        return`<tr>
+          <td style="font-weight:600">${SS[i]}</td>
+          <td style="color:#f59e0b">${d.midterm??'<span style="color:#334155">AB</span>'}</td>
+          <td style="color:#3b82f6">${d.sa??'<span style="color:#334155">AB</span>'}</td>
+          <td style="color:${c};font-weight:800">${d.term??'<span style="color:#334155">—</span>'}</td>
+          <td>${d.term?`<span class="badge" style="background:${c}22;color:${c}">${grade(d.term)}</span>`:''}</td>
+          <td>${d.term!=null?`<div class="bar-mini"><div class="bar-fill" style="width:${d.term}%;background:${c}"></div></div>`:''}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div></div>`;
+
+  mkChart('stu-bar',barCfg(SS,[
+    {label:'Midterm %',data:mPct,bg:'#f59e0b'},
+    {label:'SA %',data:sPct,bg:'#3b82f6'}
+  ],100,true));
+
+  mkChart('stu-radar',{type:'radar',data:{labels:SS,datasets:[{data:radar,fill:true,
+    backgroundColor:'rgba(245,158,11,.12)',borderColor:'#f59e0b',borderWidth:2,pointBackgroundColor:'#f59e0b',pointRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,color:'#64748b',backdropColor:'transparent'},
+        grid:{color:'#1e293b'},pointLabels:{color:'#94a3b8',font:{size:10}},angleLines:{color:'#1e293b'}}}}});
+}
+
+// ── HEATMAP PAGE ─────────────────────────────────────────
+let hmMode='term';
+function buildHeatmap(){
+  document.getElementById('heatmap').innerHTML=`
+  <div class="pills" id="hm-pills">
+    ${[['term','Term /100'],['midterm','Midterm /15'],['sa','SA /30']].map(([k,l])=>
+      `<button class="pill${hmMode===k?' on':''}" onclick="setHm('${k}')">${l}</button>`).join('')}
+  </div>
+  <div class="box"><div class="heatmap-wrap"><div id="hm-table"></div></div></div>`;
+  renderHeatmap();
+}
+
+function renderHeatmap(){
+  const max=hmMode==='term'?100:hmMode==='midterm'?15:30;
+  const bg=v=>{
+    if(v==null)return'#0a0f1a';
+    const p=v/max;
+    if(p>=.85)return'#14532d';if(p>=.7)return'#166534';if(p>=.55)return'#1e3a5f';
+    if(p>=.4)return'#172554';if(p>=.25)return'#7c2d12';return'#450a0a';
+  };
+  const fg=v=>{
+    if(v==null)return'#1e293b';const p=v/max;
+    return p>=.7?'#4ade80':p>=.4?'#93c5fd':p>=.25?'#fcd34d':'#fca5a5';
+  };
+  const field=hmMode;
+  let html=`<table><thead><tr><th style="width:155px;min-width:155px"></th>
+    ${SS.map(s=>`<th style="writing-mode:vertical-rl;transform:rotate(180deg);height:65px;padding:2px 3px;color:#64748b;font-size:9px;text-align:left;white-space:nowrap">${s}</th>`).join('')}
+  </tr></thead><tbody>`;
+  STUDENTS.forEach(s=>{
+    html+=`<tr><td style="padding:2px 8px;color:#94a3b8;font-size:10px;white-space:nowrap;border-right:1px solid #1e293b;max-width:155px;overflow:hidden;text-overflow:ellipsis">
+      <span style="color:#f59e0b;margin-right:4px;font-size:9px">${s.roll}</span>${s.name.split(' ').slice(0,2).join(' ')}</td>
+      ${SK.map(k=>{const v=s.subjects[k][field];return`<td style="background:${bg(v)};color:${fg(v)}">${v??''}</td>`;}).join('')}
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('hm-table').innerHTML=html;
+}
+
+function setHm(m){
+  hmMode=m;
+  document.querySelectorAll('#hm-pills .pill').forEach((b,i)=>b.classList.toggle('on',['term','midterm','sa'][i]===m));
+  renderHeatmap();
+}
+
+// ── INSIGHTS PAGE ─────────────────────────────────────────
+function buildInsights(){
+  const bi=tA.reduce((b,v,i)=>(v??0)>=(tA[b]??0)?i:b,0);
+  const wi=tA.reduce((b,v,i)=>(v??99)<=(tA[b]??99)?i:b,0);
+  const top=sorted[0],bot=[...sorted].pop();
+  const bands=[
+    {l:'A+ ≥90',n:allT.filter(v=>v>=90).length,c:'#22c55e'},
+    {l:'A 75–89',n:allT.filter(v=>v>=75&&v<90).length,c:'#3b82f6'},
+    {l:'B 60–74',n:allT.filter(v=>v>=60&&v<75).length,c:'#f59e0b'},
+    {l:'C 40–59',n:allT.filter(v=>v>=40&&v<60).length,c:'#f97316'},
+    {l:'D <40',n:allT.filter(v=>v<40).length,c:'#ef4444'},
+  ];
+  const cards=[
+    {l:'Class Average',v:classAvg+'/100',s:'Across all subjects & students',ac:'#f59e0b'},
+    {l:'Best Subject',v:SS[bi],s:`Avg ${tA[bi]?.toFixed(1)}/100`,ac:'#22c55e'},
+    {l:'Weakest Subject',v:SS[wi],s:`Avg ${tA[wi]?.toFixed(1)}/100`,ac:'#ef4444'},
+    {l:'Top Student',v:top.name.split(' ').slice(0,2).join(' '),s:`${sAvg(top)}/100`,ac:'#3b82f6'},
+    {l:'Needs Attention',v:sorted[sorted.length-1].name.split(' ').slice(0,2).join(' '),s:`${sAvg(sorted[sorted.length-1])}/100`,ac:'#f43f5e'},
+    {l:'Scores ≥ 75',v:allT.filter(v=>v>=75).length,s:'Distinction level',ac:'#22c55e'},
+    {l:'Scores < 40',v:allT.filter(v=>v<40).length,s:'Need urgent support',ac:'#ef4444'},
+    {l:'Scores ≥ 90',v:allT.filter(v=>v>=90).length,s:'Outstanding marks',ac:'#a855f7'},
+  ];
+  const minT=SK.map(k=>{const v=STUDENTS.map(s=>s.subjects[k].term).filter(x=>x!=null);return v.length?Math.min(...v):null});
+  const maxT=SK.map(k=>{const v=STUDENTS.map(s=>s.subjects[k].term).filter(x=>x!=null);return v.length?Math.max(...v):null});
+
+  document.getElementById('insights').innerHTML=`
+  <div class="grid-auto">
+    ${cards.map(c=>`<div class="ins-card" style="border-left:3px solid ${c.ac}">
+      <div class="lbl">${c.l}</div><div class="val">${c.v}</div><div class="sub">${c.s}</div>
+    </div>`).join('')}
+  </div>
+  <div class="grid2">
+    <div class="box"><div class="box-title">Grade Band Distribution</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="ins-bands"></canvas></div></div>
+    <div class="box"><div class="box-title">Subject Range: Min / Avg / Max</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="ins-range"></canvas></div></div>
+  </div>`;
+
+  mkChart('ins-bands',barCfg(bands.map(b=>b.l),[{label:'Count',data:bands.map(b=>b.n),bg:bands.map(b=>b.c)}],Math.max(...bands.map(b=>b.n))+10));
+  mkChart('ins-range',barCfg(SS,[
+    {label:'Min',data:minT,bg:'#ef4444'},
+    {label:'Avg',data:tA.map(v=>v!=null?+v.toFixed(1):null),bg:'#f59e0b'},
+    {label:'Max',data:maxT,bg:'#22c55e'}
+  ],100));
+}
+
+// ── helpers ──────────────────────────────────────────────
+function rankItem(rank,name,sub,score,color){
+  const m={1:'linear-gradient(135deg,#ffd700,#f97316)',2:'linear-gradient(135deg,#cbd5e1,#94a3b8)',3:'linear-gradient(135deg,#cd7f32,#92400e)'};
+  const bg=m[rank]||'#1e293b';const fc=rank<=3?'#000':'#64748b';
+  return`<div class="rank-item">
+    <div class="medal" style="background:${bg};color:${fc}">${rank}</div>
+    <div style="flex:1;min-width:0"><div class="rank-name">${name}</div>${sub?`<div class="rank-sub">${sub}</div>`:''}</div>
+    <div class="rank-score" style="color:${color}">${score}</div>
+  </div>`;
+}
+
+// ── page routing ──────────────────────────────────────────
+const builders={overview:buildOverview,subject:buildSubject,student:buildStudent,heatmap:buildHeatmap,insights:buildInsights};
+const built={};
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(!built[id]){builders[id]();built[id]=true;}
+}
+
+// init
+buildOverview();
+built['overview']=true;
+</script>
+</body>
+</html>
